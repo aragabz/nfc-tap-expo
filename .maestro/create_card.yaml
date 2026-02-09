@@ -1,0 +1,12 @@
+appId: nfc-tap-expo
+---
+- launchApp
+- tapOn: "Create My Card"
+- tapOn: "Full Name *"
+- inputText: "Jane Doe"
+- tapOn: "Job Title"
+- inputText: "Software Engineer"
+- tapOn: "Company"
+- inputText: "Expo"
+- tapOn: "Save Card"
+- assertVisible: "Jane Doe"

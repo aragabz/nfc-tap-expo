@@ -1,0 +1,7 @@
+appId: nfc-tap-expo
+---
+- launchApp
+- tapOn: "Scan"
+- assertVisible: "Scan Business Card"
+- tapOn: "QR Scanner"
+- assertVisible: "We need your permission to show the camera"

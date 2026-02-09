@@ -1,0 +1,7 @@
+appId: nfc-tap-expo
+---
+- launchApp
+- tapOn: "Share"
+- assertVisible: "Share Your Card"
+- assertVisible: "OR"
+- assertVisible: "NFC Tap"
