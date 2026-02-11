@@ -1,24 +1,21 @@
 {
   "expo": {
-    "name": "nfc-tap-expo",
-    "slug": "nfc-tap-expo",
+    "name": "Digital Business Cards",
+    "slug": "digital-business-cards",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "nfctapexpo",
+    "scheme": ["msauth", "com.tasama.digitalbusinesscards"],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rasnconsult.nfctapexpo",
+      "bundleIdentifier": "com.tasama.digitalbusinesscards",
       "infoPlist": {
         "NFCReaderUsageDescription": "Allow $(PRODUCT_NAME) to use NFC to share and scan business cards"
       },
       "entitlements": {
-        "com.apple.developer.nfc.readersession.formats": [
-          "NDEF",
-          "TAG"
-        ]
+        "com.apple.developer.nfc.readersession.formats": ["NDEF", "TAG"]
       }
     },
     "android": {
@@ -37,7 +34,7 @@
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.RECORD_AUDIO"
       ],
-      "package": "com.rasnconsult.nfctapexpo"
+      "package": "com.tasama.digitalbusinesscards"
     },
     "web": {
       "output": "static",
@@ -74,7 +71,9 @@
         {
           "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to select a profile image"
         }
-      ]
+      ],
+      "expo-secure-store",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

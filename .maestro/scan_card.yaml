@@ -1,4 +1,4 @@
-appId: nfc-tap-expo
+appId: digital-business-cards
 ---
 - launchApp
 - tapOn: "Scan"

@@ -1,4 +1,5 @@
-# nfc-tap-expo Constitution
+# digital-business-cards Constitution
+
 <!--
 SYNC IMPACT REPORT
 Version: 1.0.0 (Initial Ratification)
@@ -19,15 +20,19 @@ Templates Status:
 ## Core Principles
 
 ### I. Code Quality & Standards
+
 Code must be strictly typed (TypeScript), linted (ESLint), and formatted (Prettier). All code should be readable, maintainable, and prefer clarity over cleverness. No `any` types unless absolutely necessary and documented. Comments should explain "why", not "what".
 
 ### II. Testing Strategy
+
 Unit tests are mandatory for business logic, utilities, and complex hooks. Critical user paths must be covered by integration tests. Tests must be deterministic and run in CI. Focus on testing behavior (what the user sees/does), not implementation details.
 
 ### III. UX & Design Consistency
+
 The application must provide a native-like feel. Adhere to platform-specific guidelines (iOS HIG, Android Material Design) where appropriate. UI must be responsive, accessible (a11y), and handle edge cases (loading, error, offline) gracefully. Visual hierarchy and theming must remain consistent across screens.
 
 ### IV. Performance & Efficiency
+
 Maintain 60fps for animations and interactions. Optimize bundle size and startup time. Network operations must be efficient, minimizing data usage and handling latency. Avoid unnecessary re-renders by using React.memo and stable callbacks appropriately.
 
 ## Technology Stack

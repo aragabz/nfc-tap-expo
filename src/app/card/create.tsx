@@ -1,13 +1,13 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Crypto from 'expo-crypto';
 import { CardForm } from '../../components/card/card-form';
 import { useStorage } from '../../hooks/use-storage';
 import { ThemedView } from '../../components/themed-view';
 import { BusinessCard } from '../../types/card';
-import * as Crypto from 'expo-crypto';
 
-export default function CreateCardScreen() {
+export default function Create() {
   const router = useRouter();
   const { saveProfile, isLoading } = useStorage();
 

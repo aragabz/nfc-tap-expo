@@ -1,12 +1,109 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 import { BusinessCard, ScannedCard } from '../types/card';
+import { AuthSession } from '../types/auth';
 
 const STORAGE_KEYS = {
   USER_PROFILE: 'user_profile',
   SCANNED_CARDS: 'scanned_cards',
+  AUTH_TOKENS: 'auth_tokens',
+  ONBOARDING_COMPLETED: 'onboarding_completed',
+};
+
+// Helper to handle SecureStore with fallback for Web or missing native module
+const isSecureStoreAvailable = Platform.OS !== 'web';
+
+const safeSecureSave = async (key: string, value: string) => {
+  try {
+    if (isSecureStoreAvailable) {
+      await SecureStore.setItemAsync(key, value);
+    } else {
+      await AsyncStorage.setItem(key, value);
+    }
+  } catch (error) {
+    // If SecureStore fails due to missing native module, fallback to AsyncStorage
+    await AsyncStorage.setItem(key, value);
+  }
+};
+
+const safeSecureGet = async (key: string) => {
+  try {
+    if (isSecureStoreAvailable) {
+      return await SecureStore.getItemAsync(key);
+    }
+    return await AsyncStorage.getItem(key);
+  } catch (error) {
+    return await AsyncStorage.getItem(key);
+  }
+};
+
+const safeSecureDelete = async (key: string) => {
+  try {
+    if (isSecureStoreAvailable) {
+      await SecureStore.deleteItemAsync(key);
+    } else {
+      await AsyncStorage.removeItem(key);
+    }
+  } catch (error) {
+    await AsyncStorage.removeItem(key);
+  }
 };
 
 export const StorageService = {
+  // Auth Tokens (Secure)
+  async saveTokens(session: AuthSession): Promise<void> {
+    try {
+      await safeSecureSave(STORAGE_KEYS.AUTH_TOKENS, JSON.stringify(session));
+    } catch (error) {
+      console.error('Error saving tokens:', error);
+      throw error;
+    }
+  },
+
+  async getTokens(): Promise<AuthSession | null> {
+    try {
+      const data = await safeSecureGet(STORAGE_KEYS.AUTH_TOKENS);
+      return data ? JSON.parse(data) : null;
+    } catch (error) {
+      console.error('Error getting tokens:', error);
+      throw error;
+    }
+  },
+
+  async clearTokens(): Promise<void> {
+    try {
+      await safeSecureDelete(STORAGE_KEYS.AUTH_TOKENS);
+    } catch (error) {
+      console.error('Error clearing tokens:', error);
+      throw error;
+    }
+  },
+
+  // Onboarding Status
+  async saveOnboardingStatus(completed: boolean): Promise<void> {
+    try {
+      console.log('Storage: saving onboarding status', completed);
+      await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, JSON.stringify(completed));
+    } catch (error) {
+      console.error('Error saving onboarding status:', error);
+      throw error;
+    }
+  },
+
+  async getOnboardingStatus(): Promise<boolean> {
+    try {
+      const data = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
+      console.log('Storage: retrieved onboarding status raw', data);
+      if (data === null) return false;
+      // Handle both JSON-stringified and raw string values
+      return data === 'true' || data === '"true"';
+    } catch (error) {
+      console.error('Error getting onboarding status:', error);
+      throw error;
+    }
+  },
+
   // User Profile
   async saveUserProfile(card: BusinessCard): Promise<void> {
     try {

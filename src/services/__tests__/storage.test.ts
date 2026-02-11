@@ -1,11 +1,19 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { StorageService } from '../storage';
 import { BusinessCard, ScannedCard } from '../../types/card';
+import { AuthSession } from '../../types/auth';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
   getItem: jest.fn(),
   removeItem: jest.fn(),
+}));
+
+jest.mock('expo-secure-store', () => ({
+  setItemAsync: jest.fn(),
+  getItemAsync: jest.fn(),
+  deleteItemAsync: jest.fn(),
 }));
 
 const mockCard: BusinessCard = {
@@ -19,9 +27,42 @@ const mockScannedCard: ScannedCard = {
   scannedAt: new Date().toISOString(),
 };
 
+const mockSession: AuthSession = {
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
+  expiresAt: 123456789,
+};
+
 describe('StorageService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('saves auth tokens', async () => {
+    await StorageService.saveTokens(mockSession);
+    expect(SecureStore.setItemAsync).toHaveBeenCalledWith('auth_tokens', JSON.stringify(mockSession));
+  });
+
+  it('gets auth tokens', async () => {
+    (SecureStore.getItemAsync as jest.Mock).mockResolvedValue(JSON.stringify(mockSession));
+    const result = await StorageService.getTokens();
+    expect(result).toEqual(mockSession);
+  });
+
+  it('clears auth tokens', async () => {
+    await StorageService.clearTokens();
+    expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('auth_tokens');
+  });
+
+  it('saves onboarding status', async () => {
+    await StorageService.saveOnboardingStatus(true);
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith('onboarding_completed', JSON.stringify(true));
+  });
+
+  it('gets onboarding status', async () => {
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(true));
+    const result = await StorageService.getOnboardingStatus();
+    expect(result).toBe(true);
   });
 
   it('saves user profile', async () => {

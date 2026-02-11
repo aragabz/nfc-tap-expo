@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+import * as ImagePicker from "expo-image-picker";
+import React, { useState } from "react";
 import {
+  Alert,
+  Image,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
-  Image,
-  ScrollView,
-  Alert,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { BusinessCard } from '../../types/card';
-import { ThemedText } from '../themed-text';
-import { ThemedView } from '../themed-view';
+} from "react-native";
+import { BusinessCard } from "../../types/card";
+import { ThemedText } from "../themed-text";
 
 interface CardFormProps {
   initialData?: BusinessCard | null;
@@ -19,17 +18,23 @@ interface CardFormProps {
   isLoading?: boolean;
 }
 
-export const CardForm = ({ initialData, onSubmit, isLoading }: CardFormProps) => {
-  const [fullName, setFullName] = useState(initialData?.fullName || '');
-  const [jobTitle, setJobTitle] = useState(initialData?.jobTitle || '');
-  const [company, setCompany] = useState(initialData?.company || '');
-  const [phone, setPhone] = useState(initialData?.phone || '');
-  const [email, setEmail] = useState(initialData?.email || '');
-  const [profileImage, setProfileImage] = useState(initialData?.profileImage || '');
+export const CardForm = ({
+  initialData,
+  onSubmit,
+  isLoading,
+}: CardFormProps) => {
+  const [fullName, setFullName] = useState(initialData?.fullName || "");
+  const [jobTitle, setJobTitle] = useState(initialData?.jobTitle || "");
+  const [company, setCompany] = useState(initialData?.company || "");
+  const [phone, setPhone] = useState(initialData?.phone || "");
+  const [email, setEmail] = useState(initialData?.email || "");
+  const [profileImage, setProfileImage] = useState(
+    initialData?.profileImage || "",
+  );
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
@@ -43,7 +48,7 @@ export const CardForm = ({ initialData, onSubmit, isLoading }: CardFormProps) =>
 
   const handleSubmit = () => {
     if (!fullName.trim()) {
-      Alert.alert('Error', 'Full Name is required');
+      Alert.alert("Error", "Full Name is required");
       return;
     }
     onSubmit({
@@ -124,7 +129,7 @@ export const CardForm = ({ initialData, onSubmit, isLoading }: CardFormProps) =>
         disabled={isLoading}
       >
         <ThemedText style={styles.buttonText}>
-          {isLoading ? 'Saving...' : 'Save Card'}
+          {isLoading ? "Saving..." : "Save Card"}
         </ThemedText>
       </TouchableOpacity>
     </ScrollView>
@@ -136,7 +141,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   imageContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   image: {
@@ -145,43 +150,43 @@ const styles = StyleSheet.create({
     borderRadius: 60,
   },
   placeholder: {
-    backgroundColor: '#f0f0f0',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderStyle: 'dashed',
+    borderColor: "#ccc",
+    borderStyle: "dashed",
   },
   inputContainer: {
     marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 5,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
     marginBottom: 15,
-    color: '#000',
+    color: "#000",
   },
   button: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     padding: 15,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
   },
   disabled: {
     opacity: 0.5,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
