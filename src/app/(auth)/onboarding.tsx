@@ -53,7 +53,7 @@ export default function Onboarding() {
   }).current;
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={styles.container} safeArea>
       <TouchableOpacity 
         style={styles.skipButton} 
         onPress={handleSkip}
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   },
   skipButton: {
     position: 'absolute',
-    top: 60,
+    top: 20,
     right: 20,
     zIndex: 1,
   },

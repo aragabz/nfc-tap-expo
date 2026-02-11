@@ -26,7 +26,7 @@ export default function HomeScreen() {
 
   if (!userProfile) {
     return (
-      <ThemedView style={styles.container}>
+      <ThemedView style={styles.container} safeArea>
         <View style={styles.welcomeContainer}>
           <ThemedText type="title">Welcome!</ThemedText>
           <ThemedText style={styles.subtitle}>
@@ -44,7 +44,8 @@ export default function HomeScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ThemedView style={styles.container} safeArea>
+      <ScrollView style={styles.container}>
       <View style={styles.cardContainer}>
         <View style={styles.card}>
           <View style={styles.cardHeader}>
@@ -104,6 +105,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
     </ScrollView>
+    </ThemedView>
   );
 }
 

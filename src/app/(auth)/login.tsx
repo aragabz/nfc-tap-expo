@@ -35,7 +35,7 @@ export default function Login() {
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView style={styles.container} safeArea>
       <View style={styles.header}>
         <IconSymbol name="house.fill" size={80} color="#007AFF" />
         <ThemedText type="title" style={styles.title}>
