@@ -6,45 +6,43 @@ import axios, {
 import { Platform } from "react-native";
 import { StorageService } from "./storage";
 
-// 🔧 FIXED: Better URL normalization that actually removes ALL whitespace
-const normalizeBaseUrl = (value: string): string => {
-  if (!value) return "";
+// 🔧 EMERGENCY FIX: Ultra-aggressive URL cleaning
 
-  // Step 1: Remove zero-width characters
-  let cleaned = value.replace(/[\u200B-\u200D\uFEFF]/g, "");
+// 🔧 DEBUG: Check what's happening
+console.log("🔍 ENV CHECK:", {
+  EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  EXPO_PUBLIC_API_URL_LENGTH: process.env.EXPO_PUBLIC_API_URL?.length,
+  NEXT_PUBLIC_API_URL_LENGTH: process.env.NEXT_PUBLIC_API_URL?.length,
+});
 
-  // Step 2: Remove all types of quotes (single, double, curly, backtick)
-  cleaned = cleaned.replace(/['"`"'"'"`]/g, "");
+// 🔧 FORCE FALLBACK: Ignore env vars completely if they contain spaces or quotes
+// let API_BASE_URL = "https://cards-api-dev.tasama.com.sa/api"; // Hardcoded clean URL
 
-  // Step 3: Trim whitespace from ends
-  cleaned = cleaned.trim();
+// const envUrl =
+// process.env.EXPO_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_URL;
+// if (envUrl) {
+//   const cleaned = cleanUrl(envUrl);
+//   // Only use env var if it's valid (no spaces, proper URL)
+//   if (cleaned && !cleaned.includes(" ") && cleaned.startsWith("http")) {
+//     API_BASE_URL = cleaned;
+//     console.log("✅ Using cleaned env URL:", API_BASE_URL);
+//   } else {
+//     console.warn(
+//       "❌ Env URL invalid, using hardcoded fallback. Cleaned was:",
+//       JSON.stringify(cleaned),
+//     );
+//   }
+// }
 
-  // Step 4: Remove ALL whitespace characters from entire string (including internal spaces)
-  cleaned = cleaned.replace(/\s+/g, "");
+// console.log("🔍 FINAL API_BASE_URL:", JSON.stringify(API_BASE_URL));
 
-  // Step 5: Remove trailing slashes
-  cleaned = cleaned.replace(/\/+$/, "");
-
-  console.log("[API] Normalized baseURL:", {
-    original: JSON.stringify(value),
-    cleaned: JSON.stringify(cleaned),
-    originalLength: value.length,
-    cleanedLength: cleaned.length,
-  });
-
-  return cleaned;
-};
-
-// 🔧 FIXED: Ensure no trailing space in fallback URL
-const API_BASE_URL = normalizeBaseUrl(
-  process.env.NEXT_PUBLIC_API_URL || "https://cards-api-dev.tasama.com.sa/api",
-);
 const API_TIMEOUT = 30000;
-const API_ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT || "development";
+const API_ENVIRONMENT = "development";
 
-const escapeShell = (value: string) => {
-  return `'${value.replace(/'/g, `'\\''`)}'`;
-};
+// const escapeShell = (value: string) => {
+//   return `'${value.replace(/'/g, `'\\''`)}'`;
+// };
 
 const headersToRecord = (headers: any): Record<string, string> => {
   if (!headers) return {};
@@ -65,54 +63,54 @@ const redactHeaders = (headers: Record<string, string>) => {
   return result;
 };
 
-const buildFullUrl = (baseURL: string | undefined, url: string | undefined) => {
-  const u = (url || "").trim();
-  if (/^https?:\/\//i.test(u)) return u;
-  if (!baseURL) return u;
-  const a = String(baseURL).replace(/\/+$/, "");
-  const b = u.replace(/^\/+/, "");
-  return b ? `${a}/${b}` : a;
-};
+// const buildFullUrl = (baseURL: string | undefined, url: string | undefined) => {
+//   const u = (url || "").trim();
+//   if (/^https?:\/\//i.test(u)) return u;
+//   if (!baseURL) return u;
+//   const a = String(baseURL).replace(/\/+$/, "");
+//   const b = u.replace(/^\/+/, "");
+//   return b ? `${a}/${b}` : a;
+// };
 
-const toCurl = (config: any) => {
-  const method = String(config?.method || "get").toUpperCase();
-  const fullUrl = buildFullUrl(config?.baseURL, config?.url);
+// const toCurl = (config: any) => {
+//   const method = String(config?.method || "get").toUpperCase();
+//   const fullUrl = buildFullUrl(config?.baseURL, config?.url);
 
-  const rawHeaders = headersToRecord(config?.headers);
-  const safeHeaders = redactHeaders(rawHeaders);
+//   const rawHeaders = headersToRecord(config?.headers);
+//   const safeHeaders = redactHeaders(rawHeaders);
 
-  const headerArgs = Object.entries(safeHeaders)
-    .filter(([_, v]) => v !== undefined && v !== null && String(v).length > 0)
-    .map(([k, v]) => `-H ${escapeShell(`${k}: ${v}`)}`)
-    .join(" ");
+//   const headerArgs = Object.entries(safeHeaders)
+//     .filter(([_, v]) => v !== undefined && v !== null && String(v).length > 0)
+//     .map(([k, v]) => `-H ${escapeShell(`${k}: ${v}`)}`)
+//     .join(" ");
 
-  let dataArg = "";
-  const data = config?.data;
-  const isFormData =
-    typeof FormData !== "undefined" && data instanceof FormData;
-  if (data !== undefined && data !== null && !isFormData) {
-    const body =
-      typeof data === "string"
-        ? data
-        : typeof data === "object"
-          ? JSON.stringify(data)
-          : String(data);
-    const clipped = body.length > 2000 ? `${body.slice(0, 2000)}…` : body;
-    dataArg = `--data ${escapeShell(clipped)}`;
-  }
+//   let dataArg = "";
+//   const data = config?.data;
+//   const isFormData =
+//     typeof FormData !== "undefined" && data instanceof FormData;
+//   if (data !== undefined && data !== null && !isFormData) {
+//     const body =
+//       typeof data === "string"
+//         ? data
+//         : typeof data === "object"
+//           ? JSON.stringify(data)
+//           : String(data);
+//     const clipped = body.length > 2000 ? `${body.slice(0, 2000)}…` : body;
+//     dataArg = `--data ${escapeShell(clipped)}`;
+//   }
 
-  const parts = [
-    "curl",
-    "-i",
-    "-X",
-    method,
-    escapeShell(fullUrl),
-    headerArgs,
-    dataArg,
-  ].filter(Boolean);
+//   const parts = [
+//     "curl",
+//     "-i",
+//     "-X",
+//     method,
+//     escapeShell(fullUrl),
+//     headerArgs,
+//     dataArg,
+//   ].filter(Boolean);
 
-  return parts.join(" ");
-};
+//   return parts.join(" ");
+// };
 
 // Request interceptor to add session token
 const addAuthToken = async (
@@ -121,27 +119,9 @@ const addAuthToken = async (
   try {
     console.log("[AUTH] Attempting to retrieve tokens from storage...");
     const tokens = await StorageService.getTokens();
-
-    if (!tokens?.accessToken) {
-      console.warn("[AUTH] No tokens found or no accessToken");
-      return config;
-    }
-
-    // Ensure headers object exists
-    if (!config.headers) {
-      config.headers = new axios.AxiosHeaders();
-    }
-
     // Set Authorization header properly
-    const authHeader = `Bearer ${tokens.accessToken}`;
+    const authHeader = `Bearer ${tokens?.accessToken || ""}`;
     config.headers.set("Authorization", authHeader);
-
-    const prefix = tokens.accessToken.slice(0, 8);
-    const suffix = tokens.accessToken.slice(-4);
-    console.log(
-      `[AUTH] Authorization set (Bearer len=${tokens.accessToken.length} ${prefix}…${suffix})`,
-    );
-
     return config;
   } catch (error) {
     console.error("Error adding auth token:", error);
@@ -167,39 +147,23 @@ const createAxiosInstance = (
   config: any = {},
   options?: { includeAuth?: boolean },
 ): AxiosInstance => {
+  // 🔧 FORCE CLEAN: Ensure baseURL has no spaces at instance creation
+  // const baseURL = cleanUrl(config.baseURL || API_BASE_URL);
+  const baseURL = "https://cards-api-dev.tasama.com.sa/api";
+
+  console.log(
+    "🔍 Creating axios instance with baseURL:",
+    JSON.stringify(baseURL),
+  );
+
   const instance = axios.create({
-    baseURL: API_BASE_URL,
+    baseURL,
     timeout: API_TIMEOUT,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    ...config,
   });
-
-  if (API_ENVIRONMENT === "development") {
-    instance.interceptors.request.use(
-      (cfg) => {
-        try {
-          if (cfg?.baseURL) cfg.baseURL = normalizeBaseUrl(String(cfg.baseURL));
-          if (cfg?.url) cfg.url = String(cfg.url).trim();
-          const fullUrl = buildFullUrl(cfg?.baseURL, cfg?.url);
-          console.log(
-            "[AXIOS]",
-            JSON.stringify({
-              method: cfg?.method,
-              baseURL: cfg?.baseURL,
-              url: cfg?.url,
-              fullUrl,
-            }),
-          );
-          console.log("[CURL]", toCurl(cfg));
-        } catch {}
-        return cfg;
-      },
-      (error) => Promise.reject(error),
-    );
-  }
 
   if (options?.includeAuth) {
     instance.interceptors.request.use(addAuthToken, (error) =>
@@ -229,19 +193,26 @@ export const axiosInstance = axiosPrivateInstance;
 
 // Utility function for API error handling
 export const handleApiError = (error: AxiosError): string => {
-  if ((error as any)?.code === "ERR_NETWORK") {
-    const cfg = (error as any)?.config as any | undefined;
-    const baseURL = cfg?.baseURL ?? API_BASE_URL;
-    const url = cfg?.url ?? "";
-    const hasAuth = !!cfg?.headers?.Authorization;
+  const cfg = (error as any)?.config as any | undefined;
+  const rawBaseURL = "https://cards-api-dev.tasama.com.sa/api";
+  const url = cfg?.url ?? "";
+  const hasAuth = !!cfg?.headers?.Authorization;
 
+  if (
+    (error as any)?.code === "ERR_NETWORK" ||
+    error.message === "Network Error"
+  ) {
     console.error("[Network Error Details]:", {
       message: error.message,
       code: (error as any).code,
-      baseURL: JSON.stringify(baseURL),
+      rawBaseURL: JSON.stringify(rawBaseURL),
+      cleanedBaseURL: JSON.stringify(rawBaseURL),
       url: JSON.stringify(url),
       hasAuth,
       platform: Platform.OS,
+      requestHeaders: cfg?.headers
+        ? redactHeaders(headersToRecord(cfg.headers))
+        : "none",
     });
 
     let hint = "";
@@ -252,30 +223,36 @@ export const handleApiError = (error: AxiosError): string => {
       hint = " Check Info.plist for NSAppTransportSecurity settings.";
     }
 
-    return `Network error. Verify API_URL is reachable: ${baseURL}${hint}`;
+    return `Network error. Verify API_URL is reachable: ${rawBaseURL}${hint}`;
   }
 
   if (error.response?.data && typeof error.response.data === "object") {
     const data = error.response.data as any;
+    console.error("[API Error Response]:", JSON.stringify(data, null, 2));
     return data.message || data.error || "An error occurred";
   }
 
   if (error.response && error.response.status === 401) {
+    console.error("[API Error] 401 Unauthorized");
     return "Authentication required";
   }
 
   if (error.response && error.response.status === 403) {
+    console.error("[API Error] 403 Forbidden");
     return "Access denied";
   }
 
   if (error.response && error.response.status === 404) {
+    console.error("[API Error] 404 Not Found", url);
     return "Resource not found";
   }
 
   if (error.response && error.response.status >= 500) {
+    console.error("[API Error] Server Error", error.response.status);
     return "Server error occurred";
   }
 
+  console.error("[API Error] Unknown:", error.message);
   return error.message || "Network error occurred";
 };
 

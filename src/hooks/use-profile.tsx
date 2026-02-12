@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { Profile, ProfileService } from "../services";
+import { Profile, ProfileService, StorageService } from "../services";
 
 interface UseProfileState {
   profile: Profile | null;

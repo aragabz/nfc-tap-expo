@@ -29,11 +29,15 @@ export default function ProfileScreen() {
 
   const handleGetProfile = useCallback(async () => {
     if (!userId) return;
-    await getPublicProfile(userId);
+    try {
+      await getPublicProfile(userId);
+    } catch (error) {
+      console.log(error);
+    }
   }, [getPublicProfile, userId]);
 
   useEffect(() => {
-    handleGetProfile();
+    // handleGetProfile();
   }, [handleGetProfile]);
 
   const displayName = useMemo(() => {
