@@ -70,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       console.log("Loading saved session...");
       const savedSession = await StorageService.getTokens();
+      console.log("Saved Session:", JSON.stringify(savedSession));
       if (savedSession) {
         console.log("Found saved session, checking expiration...");
         // Check expiration and refresh if needed
@@ -81,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               TENANT_ID,
               CLIENT_ID,
             );
+            console.log("Refreshed Session:", JSON.stringify(newSession));
             await StorageService.saveTokens(newSession);
             setSession(newSession);
             const profile = await AuthService.getUserProfile(
