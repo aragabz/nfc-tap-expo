@@ -1,9 +1,8 @@
-import * as WebBrowser from "expo-web-browser";
+import Icons from "@/assets/icons";
 import React from "react";
 import { Alert, StyleSheet, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../../components/themed-text";
 import { ThemedView } from "../../components/themed-view";
-import { IconSymbol } from "../../components/ui/icon-symbol";
 import { LoadingOverlay } from "../../components/ui/loading-overlay";
 import { useAuth } from "../../hooks/use-auth";
 
@@ -22,28 +21,14 @@ export default function Login() {
     }
   };
 
-  const handleTestBrowser = async () => {
-    try {
-      await WebBrowser.openBrowserAsync("https://google.com");
-    } catch (error) {
-      console.error("Browser test error:", error);
-      Alert.alert(
-        "Browser Error",
-        "Failed to open google.com. This suggests a general browser issue on this device.",
-      );
-    }
-  };
-
   return (
     <ThemedView style={styles.container}>
       <View style={styles.header}>
-        <IconSymbol name="house.fill" size={80} color="#007AFF" />
-        <ThemedText type="title" style={styles.title}>
-          NFC Tap
-        </ThemedText>
-        <ThemedText style={styles.subtitle}>
-          Sign in to manage your digital business cards
-        </ThemedText>
+        <Icons.TasamaLogoSVG
+          style={{
+            paddingTop: 40,
+          }}
+        />
       </View>
 
       <View style={styles.content}>
@@ -56,12 +41,6 @@ export default function Login() {
         >
           <ThemedText style={styles.microsoftButtonText}>
             {isLoading ? "Signing in..." : "Sign in with Microsoft"}
-          </ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.testButton} onPress={handleTestBrowser}>
-          <ThemedText style={styles.testButtonText}>
-            Test Browser Connectivity
           </ThemedText>
         </TouchableOpacity>
 
@@ -80,52 +59,56 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: "center",
+    backgroundColor: "#0B2B70",
   },
   header: {
     alignItems: "center",
     marginBottom: 60,
   },
-  title: {
-    marginTop: 20,
-    fontSize: 32,
-  },
   subtitle: {
-    marginTop: 10,
+    marginTop: 20,
     textAlign: "center",
-    opacity: 0.7,
-    fontSize: 16,
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 18,
+    fontWeight: "500",
   },
   content: {
     alignItems: "center",
   },
   microsoftButton: {
-    backgroundColor: "#2F2F2F",
+    backgroundColor: "#FFFFFF",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 15,
+    paddingVertical: 16,
     paddingHorizontal: 30,
-    borderRadius: 8,
+    borderRadius: 12,
     width: "100%",
-    marginBottom: 20,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   microsoftButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
+    color: "#0B2B70",
+    fontSize: 17,
+    fontWeight: "700",
   },
   testButton: {
     padding: 10,
     marginBottom: 20,
   },
   testButtonText: {
-    color: "#007AFF",
+    color: "rgba(255,255,255,0.6)",
     fontSize: 14,
+    textDecorationLine: "underline",
   },
   footerText: {
     textAlign: "center",
     fontSize: 12,
-    opacity: 0.5,
+    color: "rgba(255,255,255,0.5)",
     paddingHorizontal: 40,
   },
 });

@@ -6,7 +6,7 @@ import {
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -40,26 +40,35 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
   const { session, isLoading: isAuthLoading } = useAuth();
+  const [isReady, setIsReady] = useState(false);
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     NfcService.start();
+    
+    // Set a minimum timeout for the splash screen
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 2000); // 2000ms = 2 seconds
+    
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     console.log("RootLayoutNav Sync:", {
       isAuthLoading,
+      isReady,
       hasSession: !!session,
       segments,
     });
 
-    if (isAuthLoading) {
-      console.log("RootLayoutNav: Still loading, skipping navigation check");
+    if (isAuthLoading || !isReady) {
+      console.log("RootLayoutNav: Still loading or waiting for splash timeout");
       return;
     }
 
-    // Hide splash screen once loading is complete
+    // Hide splash screen once loading is complete and timeout has passed
     SplashScreen.hideAsync();
 
     const inAuthGroup = segments[0] === "(auth)";
@@ -80,12 +89,12 @@ function RootLayoutNav() {
       }
     } else if (inAuthGroup || segments.length < 1) {
       // If session exists but user is in auth group or at root, go to main app
-      console.log("Navigation: Forcing Main App (tabs)");
-      router.replace("/(tabs)");
+      console.log("Navigation: Forcing Main App (tabs/profile)");
+      router.replace("/(tabs)/profile");
     } else {
       console.log("Navigation: No action needed", { segments });
     }
-  }, [session, isAuthLoading, segments, router]);
+  }, [session, isAuthLoading, isReady, segments, router]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

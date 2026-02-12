@@ -1,4 +1,4 @@
-import { AuthSession as Session, UserProfile } from '../types/auth';
+import { AzureUser, AzureSession as Session } from '../types/auth';
 
 export const AuthService = {
   /**
@@ -13,7 +13,7 @@ export const AuthService = {
    * Retrieves the user profile from Microsoft Graph API.
    * @param accessToken The access token to use.
    */
-  async getUserProfile(accessToken: string): Promise<UserProfile> {
+  async getUserProfile(accessToken: string): Promise<AzureUser> {
     try {
       const response = await fetch('https://graph.microsoft.com/v1.0/me', {
         headers: {
@@ -26,7 +26,7 @@ export const AuthService = {
       }
 
       const data = await response.json();
-      
+
       return {
         id: data.id,
         fullName: data.displayName,
@@ -66,7 +66,7 @@ export const AuthService = {
       }
 
       const data = await response.json();
-      
+
       return {
         accessToken: data.access_token,
         refreshToken: data.refresh_token,

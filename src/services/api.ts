@@ -63,55 +63,6 @@ const redactHeaders = (headers: Record<string, string>) => {
   return result;
 };
 
-// const buildFullUrl = (baseURL: string | undefined, url: string | undefined) => {
-//   const u = (url || "").trim();
-//   if (/^https?:\/\//i.test(u)) return u;
-//   if (!baseURL) return u;
-//   const a = String(baseURL).replace(/\/+$/, "");
-//   const b = u.replace(/^\/+/, "");
-//   return b ? `${a}/${b}` : a;
-// };
-
-// const toCurl = (config: any) => {
-//   const method = String(config?.method || "get").toUpperCase();
-//   const fullUrl = buildFullUrl(config?.baseURL, config?.url);
-
-//   const rawHeaders = headersToRecord(config?.headers);
-//   const safeHeaders = redactHeaders(rawHeaders);
-
-//   const headerArgs = Object.entries(safeHeaders)
-//     .filter(([_, v]) => v !== undefined && v !== null && String(v).length > 0)
-//     .map(([k, v]) => `-H ${escapeShell(`${k}: ${v}`)}`)
-//     .join(" ");
-
-//   let dataArg = "";
-//   const data = config?.data;
-//   const isFormData =
-//     typeof FormData !== "undefined" && data instanceof FormData;
-//   if (data !== undefined && data !== null && !isFormData) {
-//     const body =
-//       typeof data === "string"
-//         ? data
-//         : typeof data === "object"
-//           ? JSON.stringify(data)
-//           : String(data);
-//     const clipped = body.length > 2000 ? `${body.slice(0, 2000)}…` : body;
-//     dataArg = `--data ${escapeShell(clipped)}`;
-//   }
-
-//   const parts = [
-//     "curl",
-//     "-i",
-//     "-X",
-//     method,
-//     escapeShell(fullUrl),
-//     headerArgs,
-//     dataArg,
-//   ].filter(Boolean);
-
-//   return parts.join(" ");
-// };
-
 // Request interceptor to add session token
 const addAuthToken = async (
   config: InternalAxiosRequestConfig,

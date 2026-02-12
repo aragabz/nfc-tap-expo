@@ -28,37 +28,25 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "My Card",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="person.fill" color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
         name="share"
         options={{
-          title: "Share",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="square.and.arrow.up" color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
         name="scan"
         options={{
-          title: "Scan",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="qrcode.viewfinder" color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen
         name="wallet"
         options={{
-          title: "Wallet",
-          tabBarIcon: ({ color }) => (
-            <IconSymbol size={28} name="wallet.pass.fill" color={color} />
-          ),
+          href: null,
         }}
       />
       <Tabs.Screen

@@ -10,13 +10,13 @@ import React, {
 import { Alert, Platform } from "react-native";
 import { AuthService } from "../services/auth";
 import { StorageService } from "../services/storage";
-import { AuthSession as LocalAuthSession, UserProfile } from "../types/auth";
+import { AzureUser, AzureSession as LocalAuthSession } from "../types/auth";
 
 WebBrowser.maybeCompleteAuthSession();
 
 interface AuthContextType {
   session: LocalAuthSession | null;
-  user: UserProfile | null;
+  user: AzureUser | null;
   isLoading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -32,7 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [session, setSession] = useState<LocalAuthSession | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(null);
+  const [user, setUser] = useState<AzureUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSigningIn, setIsSigningIn] = useState(false);
 

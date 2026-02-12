@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
+import { AzureSession } from '../types/auth';
 import { BusinessCard, ScannedCard } from '../types/card';
-import { AuthSession } from '../types/auth';
 
 const STORAGE_KEYS = {
   USER_PROFILE: 'user_profile',
@@ -51,7 +51,7 @@ const safeSecureDelete = async (key: string) => {
 
 export const StorageService = {
   // Auth Tokens (Secure)
-  async saveTokens(session: AuthSession): Promise<void> {
+  async saveTokens(session: AzureSession): Promise<void> {
     try {
       await safeSecureSave(STORAGE_KEYS.AUTH_TOKENS, JSON.stringify(session));
     } catch (error) {
@@ -60,7 +60,7 @@ export const StorageService = {
     }
   },
 
-  async getTokens(): Promise<AuthSession | null> {
+  async getTokens(): Promise<AzureSession | null> {
     try {
       const data = await safeSecureGet(STORAGE_KEYS.AUTH_TOKENS);
       return data ? JSON.parse(data) : null;

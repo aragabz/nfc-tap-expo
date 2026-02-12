@@ -1,3 +1,5 @@
+import { getPublicUser } from "@/api/users";
+import Icons from "@/assets/icons";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
@@ -21,24 +23,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
-  const { profile, loading, error, getPublicProfile, clearError } =
-    useProfile();
+  const { profile, loading, error, clearError } = useProfile();
   const [isQrVisible, setIsQrVisible] = useState(false);
 
   const userId = user?.id;
 
-  const handleGetProfile = useCallback(async () => {
-    if (!userId) return;
-    try {
-      await getPublicProfile(userId);
-    } catch (error) {
-      console.log(error);
-    }
-  }, [getPublicProfile, userId]);
-
   useEffect(() => {
-    // handleGetProfile();
-  }, [handleGetProfile]);
+    const fetchUser = async () => {
+      try {
+        const data = await getPublicUser(userId || "");
+        console.log("User Data:", data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    // fetchUser();
+  }, []);
 
   const displayName = useMemo(() => {
     return profile?.fullName || user?.fullName || "";
@@ -139,13 +140,18 @@ export default function ProfileScreen() {
   if (!user) return null;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView bounces={false} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <ScrollView
+        bounces={false}
+        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollView}
+      >
         <View style={styles.header}>
-          <Text style={styles.brand}>TASAMA</Text>
-          <Text style={styles.brandSub}>
-            Business Services التقنية خدمات الأعمال
-          </Text>
+          <Icons.TasamaLogoSVG
+            style={{
+              paddingTop: 40,
+            }}
+          />
 
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
@@ -231,6 +237,7 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </ScrollView>
+      {loading && <LoadingOverlay message="Loading profile..." />}
       <Modal
         animationType="slide"
         transparent={true}
@@ -266,7 +273,6 @@ export default function ProfileScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-      {loading && <LoadingOverlay message="Loading profile..." />}
     </SafeAreaView>
   );
 }
@@ -276,8 +282,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0B2B70",
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
-    paddingBottom: 24,
+    flexGrow: 1,
   },
   header: {
     paddingHorizontal: 20,
@@ -285,17 +294,9 @@ const styles = StyleSheet.create({
     paddingBottom: 26,
     alignItems: "center",
   },
-  brand: {
-    color: "#FFFFFF",
-    fontSize: 36,
-    fontWeight: "800",
-    letterSpacing: 2,
-  },
-  brandSub: {
-    marginTop: 8,
-    color: "rgba(255,255,255,0.8)",
-    fontSize: 13,
-    fontWeight: "500",
+  logo: {
+    width: 280,
+    height: 56,
   },
   avatar: {
     marginTop: 26,
@@ -337,8 +338,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 22,
     paddingHorizontal: 18,
     paddingTop: 18,
-    paddingBottom: 28,
-    minHeight: 420,
+    paddingBottom: 40,
   },
   sectionHeader: {
     color: "#1F2937",

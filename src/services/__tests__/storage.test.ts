@@ -1,8 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
-import { StorageService } from '../storage';
+import { AzureSession } from '../../types/auth';
 import { BusinessCard, ScannedCard } from '../../types/card';
-import { AuthSession } from '../../types/auth';
+import { StorageService } from '../storage';
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   setItem: jest.fn(),
@@ -27,7 +27,7 @@ const mockScannedCard: ScannedCard = {
   scannedAt: new Date().toISOString(),
 };
 
-const mockSession: AuthSession = {
+const mockSession: AzureSession = {
   accessToken: 'access-token',
   refreshToken: 'refresh-token',
   expiresAt: 123456789,

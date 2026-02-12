@@ -31,4 +31,5 @@ TypeScript 5.x: Follow standard conventions
 - 001-nfc-business-card: Added TypeScript 5.x + `expo`, `react-native-nfc-manager` (or `expo-nfc`), `react-native-qrcode-svg`, `expo-camera`, `expo-image-picker`
 
 <!-- MANUAL ADDITIONS START -->
+- Added `react-native-svg`
 <!-- MANUAL ADDITIONS END -->

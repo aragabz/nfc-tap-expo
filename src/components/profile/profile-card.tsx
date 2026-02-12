@@ -1,12 +1,12 @@
 import React from 'react';
-import { StyleSheet, View, Image } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
+import { AzureUser } from '../../types/auth';
 import { ThemedText } from '../themed-text';
 import { ThemedView } from '../themed-view';
-import { UserProfile } from '../../types/auth';
 import { IconSymbol } from '../ui/icon-symbol';
 
 interface ProfileCardProps {
-  user: UserProfile;
+  user: AzureUser;
 }
 
 export const ProfileCard: React.FC<ProfileCardProps> = ({ user }) => {
