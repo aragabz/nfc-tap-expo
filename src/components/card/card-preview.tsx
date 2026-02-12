@@ -22,7 +22,7 @@ export const CardPreview = ({ card, onClose, onSave, visible }: CardPreviewProps
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <ThemedView style={styles.modalContent}>
+        <ThemedView style={styles.modalContent} safeArea={false}>
           <View style={styles.header}>
             <ThemedText type="subtitle">Card Preview</ThemedText>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>

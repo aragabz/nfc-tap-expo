@@ -29,7 +29,7 @@ const EditCardScreen = () => {
   };
 
   return (
-    <ThemedView style={styles.container} safeArea>
+    <ThemedView style={styles.container}>
       <CardForm 
         initialData={userProfile} 
         onSubmit={handleUpdate} 

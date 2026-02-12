@@ -54,17 +54,6 @@ describe('StorageService', () => {
     expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('auth_tokens');
   });
 
-  it('saves onboarding status', async () => {
-    await StorageService.saveOnboardingStatus(true);
-    expect(AsyncStorage.setItem).toHaveBeenCalledWith('onboarding_completed', JSON.stringify(true));
-  });
-
-  it('gets onboarding status', async () => {
-    (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(true));
-    const result = await StorageService.getOnboardingStatus();
-    expect(result).toBe(true);
-  });
-
   it('saves user profile', async () => {
     await StorageService.saveUserProfile(mockCard);
     expect(AsyncStorage.setItem).toHaveBeenCalledWith('user_profile', JSON.stringify(mockCard));

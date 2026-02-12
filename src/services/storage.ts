@@ -8,7 +8,6 @@ const STORAGE_KEYS = {
   USER_PROFILE: 'user_profile',
   SCANNED_CARDS: 'scanned_cards',
   AUTH_TOKENS: 'auth_tokens',
-  ONBOARDING_COMPLETED: 'onboarding_completed',
 };
 
 // Helper to handle SecureStore with fallback for Web or missing native module
@@ -76,30 +75,6 @@ export const StorageService = {
       await safeSecureDelete(STORAGE_KEYS.AUTH_TOKENS);
     } catch (error) {
       console.error('Error clearing tokens:', error);
-      throw error;
-    }
-  },
-
-  // Onboarding Status
-  async saveOnboardingStatus(completed: boolean): Promise<void> {
-    try {
-      console.log('Storage: saving onboarding status', completed);
-      await AsyncStorage.setItem(STORAGE_KEYS.ONBOARDING_COMPLETED, JSON.stringify(completed));
-    } catch (error) {
-      console.error('Error saving onboarding status:', error);
-      throw error;
-    }
-  },
-
-  async getOnboardingStatus(): Promise<boolean> {
-    try {
-      const data = await AsyncStorage.getItem(STORAGE_KEYS.ONBOARDING_COMPLETED);
-      console.log('Storage: retrieved onboarding status raw', data);
-      if (data === null) return false;
-      // Handle both JSON-stringified and raw string values
-      return data === 'true' || data === '"true"';
-    } catch (error) {
-      console.error('Error getting onboarding status:', error);
       throw error;
     }
   },

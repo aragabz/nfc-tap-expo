@@ -10,7 +10,7 @@ interface LoadingOverlayProps {
 export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ message }) => {
   return (
     <View style={styles.container}>
-      <ThemedView style={styles.content}>
+      <ThemedView style={styles.content} safeArea={false}>
         <ActivityIndicator size="large" color="#007AFF" />
         {message && <ThemedText style={styles.message}>{message}</ThemedText>}
       </ThemedView>

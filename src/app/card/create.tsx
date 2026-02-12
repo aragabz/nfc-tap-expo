@@ -32,7 +32,7 @@ export default function Create() {
   };
 
   return (
-    <ThemedView style={styles.container} safeArea>
+    <ThemedView style={styles.container}>
       <CardForm onSubmit={handleCreate} isLoading={isLoading} />
     </ThemedView>
   );
