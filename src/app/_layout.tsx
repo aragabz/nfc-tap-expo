@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import "react-native-reanimated";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { NfcService } from "@/services/nfc";
 
@@ -30,22 +30,21 @@ export const unstable_settings = {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <RootLayoutNav />
-      </AuthProvider>
+      <RootLayoutNav />
     </SafeAreaProvider>
   );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
-  const { session, isLoading: isAuthLoading } = useAuth();
+  const { session, isLoading: isAuthLoading, isOffline, hasLocalProfile, loadSession } = useAuth();
   const [isReady, setIsReady] = useState(false);
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     NfcService.start();
+    loadSession(); // Initialize auth session
     
     // Set a minimum timeout for the splash screen
     const timer = setTimeout(() => {
@@ -53,13 +52,15 @@ function RootLayoutNav() {
     }, 2000); // 2000ms = 2 seconds
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [loadSession]);
 
   useEffect(() => {
     console.log("RootLayoutNav Sync:", {
       isAuthLoading,
       isReady,
       hasSession: !!session,
+      isOffline,
+      hasLocalProfile,
       segments,
     });
 
@@ -75,12 +76,20 @@ function RootLayoutNav() {
 
     console.log("Navigation Check:", {
       session: !!session,
+      isOffline,
+      hasLocalProfile,
       segments,
       inAuthGroup,
     });
 
-    if (!session) {
-      // If no session, force login screen
+    // Determine if we should allow entry to the main app
+    // Entry allowed if:
+    // 1. We have a valid session OR
+    // 2. We are offline AND we have a local profile cached
+    const canEnterApp = !!session || (isOffline && hasLocalProfile);
+
+    if (!canEnterApp) {
+      // If cannot enter app, force login screen
       if (segments[0] !== "(auth)" || segments[1] !== "login") {
         console.log("Navigation: Forcing Login");
         router.replace("/(auth)/login");
@@ -94,7 +103,7 @@ function RootLayoutNav() {
     } else {
       console.log("Navigation: No action needed", { segments });
     }
-  }, [session, isAuthLoading, isReady, segments, router]);
+  }, [session, isAuthLoading, isReady, isOffline, hasLocalProfile, segments, router]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

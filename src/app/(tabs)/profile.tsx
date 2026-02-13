@@ -1,16 +1,16 @@
-import { getPublicUser } from "@/api/users";
 import Icons from "@/assets/icons";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
 import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Constants from "expo-constants";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
   Linking,
   Modal,
   Pressable,
+  RefreshControl,
   ScrollView,
   Share,
   StyleSheet,
@@ -22,24 +22,18 @@ import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
-  const { profile, loading, error, clearError } = useProfile();
+  const { user, signOut, isOffline, session } = useAuth();
+  const { profile, loading, error, clearError, loadProfile } = useProfile();
   const [isQrVisible, setIsQrVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const userId = user?.id;
+  const userId = profile?.id || user?.id;
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const data = await getPublicUser(userId || "");
-        console.log("User Data:", data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    // fetchUser();
-  }, []);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadProfile();
+    setRefreshing(false);
+  }, [loadProfile]);
 
   const displayName = useMemo(() => {
     return profile?.fullName || user?.fullName || "";
@@ -137,14 +131,22 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  if (!user) return null;
+  // If we are not online and don't have a session AND don't have a cached profile, 
+  // then we really shouldn't be here, but let the layout handle the redirect.
+  // If we have a profile but no user object (offline case), we should still render.
+  if (!session && isOffline && !profile) {
+     return <LoadingOverlay message="Loading offline profile..." />;
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <ScrollView
-        bounces={false}
+        bounces={true}
         contentContainerStyle={styles.scrollContent}
         style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         <View style={styles.header}>
           <Icons.TasamaLogoSVG
@@ -237,7 +239,7 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </ScrollView>
-      {loading && <LoadingOverlay message="Loading profile..." />}
+      {loading && !refreshing && <LoadingOverlay message="Loading profile..." />}
       <Modal
         animationType="slide"
         transparent={true}

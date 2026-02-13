@@ -1,77 +1,62 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { Profile, ProfileService, StorageService } from "../services";
-
-interface UseProfileState {
-  profile: Profile | null;
-  loading: boolean;
-  error: string | null;
-}
+import { STORAGE_KEYS } from "../constants/storage";
+import { useProfileStore } from "../store/use-profile-store";
 
 export const useProfile = () => {
-  const [state, setState] = useState<UseProfileState>({
-    profile: null,
-    loading: false,
-    error: null,
-  });
+  const { profile, loading, error, setProfile, setLoading, setError, clearProfile } = useProfileStore();
+
+  const loadProfile = useCallback(async () => {
+    console.log("[useProfile] loadProfile called");
+    setLoading(true);
+    setError(null);
+    try {
+      const storedProfile = await StorageService.getItem<Profile>(STORAGE_KEYS.USER_PROFILE);
+      console.log("[useProfile] storedProfile retrieved:", !!storedProfile);
+      setProfile(storedProfile);
+      return storedProfile;
+    } catch (err) {
+      console.error("[useProfile] Error loading profile from storage:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to load profile";
+      setError(errorMessage);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [setProfile, setLoading, setError]);
 
   const getPublicProfile = useCallback(async (id: string) => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
-
+    setLoading(true);
+    setError(null);
     try {
-      const profile = await ProfileService.getPublicProfile(id);
-      setState((prev) => ({ ...prev, profile, loading: false }));
-      return profile;
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch profile";
-      setState((prev) => ({ ...prev, error: errorMessage, loading: false }));
-      throw error;
+      const profileData = await ProfileService.getPublicProfile(id);
+      setProfile(profileData);
+      return profileData;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch profile";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
     }
-  }, []);
-
-  // const updateProfile = useCallback(async (profileData: Partial<Profile>) => {
-  //   setState((prev) => ({ ...prev, loading: true, error: null }));
-
-  //   try {
-  //     const updatedProfile = await ProfileService.updateProfile(profileData);
-  //     setState((prev) => ({
-  //       ...prev,
-  //       profile: updatedProfile,
-  //       loading: false,
-  //     }));
-  //     return updatedProfile;
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error instanceof Error ? error.message : "Failed to update profile";
-  //     setState((prev) => ({ ...prev, error: errorMessage, loading: false }));
-  //     throw error;
-  //   }
-  // }, []);
-
-  // const uploadProfileImage = useCallback(async (imageFile: File) => {
-  //   setState((prev) => ({ ...prev, loading: true, error: null }));
-
-  //   try {
-  //     const imageUrl = await ProfileService.uploadProfileImage(imageFile);
-  //     setState((prev) => ({ ...prev, loading: false }));
-  //     return imageUrl;
-  //   } catch (error) {
-  //     const errorMessage =
-  //       error instanceof Error ? error.message : "Failed to upload image";
-  //     setState((prev) => ({ ...prev, error: errorMessage, loading: false }));
-  //     throw error;
-  //   }
-  // }, []);
+  }, [setProfile, setLoading, setError]);
 
   const clearError = useCallback(() => {
-    setState((prev) => ({ ...prev, error: null }));
-  }, []);
+    setError(null);
+  }, [setError]);
+
+  // Initial load
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   return {
-    ...state,
+    profile,
+    loading,
+    error,
+    loadProfile,
     getPublicProfile,
-    // updateProfile,
-    // uploadProfileImage,
     clearError,
+    clearProfile
   };
 };

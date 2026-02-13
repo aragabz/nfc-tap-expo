@@ -6,7 +6,7 @@ export {
     logApiRequest,
     logApiResponse
 } from "./api";
-export { AuthService } from "./auth";
+export { AzureService } from "./azure";
 export { ProfileService } from "./profile";
 export { StorageService } from "./storage";
 

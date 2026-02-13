@@ -1,6 +1,6 @@
 import { AzureUser, AzureSession as Session } from '../types/auth';
 
-export const AuthService = {
+export const AzureService = {
   /**
    * Clears the current session and signs the user out.
    */
