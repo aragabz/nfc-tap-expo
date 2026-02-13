@@ -26,8 +26,21 @@ export default function ProfileScreen() {
   const { profile, loading, error, clearError, loadProfile } = useProfile();
   const [isQrVisible, setIsQrVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-
   const userId = profile?.id || user?.id;
+  const onLogoutPress = useCallback(() => {
+    Alert.alert(
+      "Logout",
+      "Are you sure you want to logout? This will clear your local profile data.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Logout",
+          style: "destructive",
+          onPress: signOut,
+        },
+      ],
+    );
+  }, [signOut]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -131,11 +144,11 @@ export default function ProfileScreen() {
     }
   }, []);
 
-  // If we are not online and don't have a session AND don't have a cached profile, 
+  // If we are not online and don't have a session AND don't have a cached profile,
   // then we really shouldn't be here, but let the layout handle the redirect.
   // If we have a profile but no user object (offline case), we should still render.
   if (!session && isOffline && !profile) {
-     return <LoadingOverlay message="Loading offline profile..." />;
+    return <LoadingOverlay message="Loading offline profile..." />;
   }
 
   return (
@@ -231,7 +244,7 @@ export default function ProfileScreen() {
             />
           </View>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={signOut}>
+          <TouchableOpacity style={styles.logoutButton} onPress={onLogoutPress}>
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
           <Text style={styles.version}>
@@ -239,7 +252,9 @@ export default function ProfileScreen() {
           </Text>
         </View>
       </ScrollView>
-      {loading && !refreshing && <LoadingOverlay message="Loading profile..." />}
+      {loading && !refreshing && (
+        <LoadingOverlay message="Loading profile..." />
+      )}
       <Modal
         animationType="slide"
         transparent={true}
