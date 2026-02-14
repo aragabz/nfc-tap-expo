@@ -1,13 +1,13 @@
+import NetInfo from "@react-native-community/netinfo";
 import * as Auth from "expo-auth-session";
 import * as WebBrowser from "expo-web-browser";
-import NetInfo from "@react-native-community/netinfo";
 import { useCallback, useEffect } from "react";
 import { Alert, Platform } from "react-native";
+import { STORAGE_KEYS } from "../constants/storage";
 import { AzureService, StorageService } from "../services";
+import { useAuthStore } from "../store/use-auth-store";
 import { AzureUser, AzureSession as LocalAuthSession } from "../types/auth";
 import { BusinessCard } from "../types/card";
-import { STORAGE_KEYS } from "../constants/storage";
-import { useAuthStore } from "../store/use-auth-store";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -30,14 +30,26 @@ const mapAzureUserToCard = (user: AzureUser): BusinessCard => ({
  * Should be called at the root of the app to initialize auth.
  */
 export const useAuth = () => {
-  const { session, user, isLoading, isOffline, hasLocalProfile, setSession, setUser, setIsLoading, setIsOffline, setHasLocalProfile, clearAuth } = useAuthStore();
+  const {
+    session,
+    user,
+    isLoading,
+    isOffline,
+    hasLocalProfile,
+    setSession,
+    setUser,
+    setIsLoading,
+    setIsOffline,
+    setHasLocalProfile,
+    clearAuth,
+  } = useAuthStore();
 
   const discovery = Auth.useAutoDiscovery(
     `https://login.microsoftonline.com/${TENANT_ID}/v2.0`,
   );
 
   const redirectUri = Auth.makeRedirectUri({
-    native: "digital-business-cards://com.tasama.digitalbusinesscards",
+    native: "com.tasama.digitalbusinesscards://auth",
   });
 
   const [request, response, promptAsync] = Auth.useAuthRequest(
@@ -45,50 +57,70 @@ export const useAuth = () => {
       clientId: CLIENT_ID,
       scopes: ["openid", "profile", "email", "User.Read", "offline_access"],
       redirectUri,
+      // ✅ Add these for Azure AD
+      extraParams: {
+        prompt: "select_account",
+      },
     },
     discovery,
   );
 
-  const handleSignInSuccess = useCallback(async (newSession: LocalAuthSession) => {
-    console.log("Handling sign in success...");
-    try {
-      await StorageService.saveSecureItem(STORAGE_KEYS.AUTH_TOKENS, newSession);
-      setSession(newSession);
-      
-      const state = await NetInfo.fetch();
-      if (state.isConnected) {
-        const profile = await AzureService.getUserProfile(newSession.accessToken);
-        const card = mapAzureUserToCard(profile);
-        await StorageService.saveItem(STORAGE_KEYS.USER_PROFILE, card);
-        setUser(profile);
-        setHasLocalProfile(true);
+  const handleSignInSuccess = useCallback(
+    async (newSession: LocalAuthSession) => {
+      console.log("Handling sign in success...");
+      try {
+        await StorageService.saveSecureItem(
+          STORAGE_KEYS.AUTH_TOKENS,
+          newSession,
+        );
+        setSession(newSession);
+
+        const state = await NetInfo.fetch();
+        if (state.isConnected) {
+          const profile = await AzureService.getUserProfile(
+            newSession.accessToken,
+          );
+          const card = mapAzureUserToCard(profile);
+          await StorageService.saveItem(STORAGE_KEYS.USER_PROFILE, card);
+          setUser(profile);
+          setHasLocalProfile(true);
+        }
+      } catch (error) {
+        console.error("Error during sign in success handling:", error);
       }
-    } catch (error) {
-      console.error("Error during sign in success handling:", error);
-    }
-  }, [setSession, setUser, setHasLocalProfile]);
+    },
+    [setSession, setUser, setHasLocalProfile],
+  );
 
   const loadSession = useCallback(async () => {
     try {
       console.log("Loading saved session...");
       setIsLoading(true);
-      
+
       // Check network status
       const netState = await NetInfo.fetch();
       const offline = netState.isConnected === false;
       setIsOffline(offline);
 
       // Check for local profile
-      const storedProfile = await StorageService.getItem<BusinessCard>(STORAGE_KEYS.USER_PROFILE);
+      const storedProfile = await StorageService.getItem<BusinessCard>(
+        STORAGE_KEYS.USER_PROFILE,
+      );
       setHasLocalProfile(!!storedProfile);
 
-      const savedSession = await StorageService.getSecureItem<LocalAuthSession>(STORAGE_KEYS.AUTH_TOKENS);
-      
+      const savedSession = await StorageService.getSecureItem<LocalAuthSession>(
+        STORAGE_KEYS.AUTH_TOKENS,
+      );
+
       if (savedSession) {
         if (!offline && savedSession.expiresAt < Date.now() / 1000) {
           // Only attempt refresh if online
           if (savedSession.refreshToken) {
-            const newSession = await AzureService.refresh(savedSession.refreshToken, TENANT_ID, CLIENT_ID);
+            const newSession = await AzureService.refresh(
+              savedSession.refreshToken,
+              TENANT_ID,
+              CLIENT_ID,
+            );
             await handleSignInSuccess(newSession);
           } else {
             await StorageService.removeSecureItem(STORAGE_KEYS.AUTH_TOKENS);
@@ -97,12 +129,17 @@ export const useAuth = () => {
         } else {
           // If offline or session still valid, use saved session
           setSession(savedSession);
-          
+
           if (!offline) {
             // If online, refresh profile data
             try {
-              const profile = await AzureService.getUserProfile(savedSession.accessToken);
-              await StorageService.saveItem(STORAGE_KEYS.USER_PROFILE, mapAzureUserToCard(profile));
+              const profile = await AzureService.getUserProfile(
+                savedSession.accessToken,
+              );
+              await StorageService.saveItem(
+                STORAGE_KEYS.USER_PROFILE,
+                mapAzureUserToCard(profile),
+              );
               setUser(profile);
               setHasLocalProfile(true);
             } catch (err) {
@@ -116,7 +153,15 @@ export const useAuth = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [handleSignInSuccess, setSession, setUser, setIsLoading, setIsOffline, setHasLocalProfile, clearAuth]);
+  }, [
+    handleSignInSuccess,
+    setSession,
+    setUser,
+    setIsLoading,
+    setIsOffline,
+    setHasLocalProfile,
+    clearAuth,
+  ]);
 
   // Handle Auth Response
   useEffect(() => {
@@ -126,7 +171,8 @@ export const useAuth = () => {
         const newSession: LocalAuthSession = {
           accessToken: authentication.accessToken,
           refreshToken: authentication.refreshToken,
-          expiresAt: Math.floor(Date.now() / 1000) + (authentication.expiresIn || 3600),
+          expiresAt:
+            Math.floor(Date.now() / 1000) + (authentication.expiresIn || 3600),
         };
         handleSignInSuccess(newSession);
       } else if (params.code && discovery) {
@@ -135,7 +181,9 @@ export const useAuth = () => {
           {
             clientId: CLIENT_ID,
             code: params.code,
-            extraParams: request?.codeVerifier ? { code_verifier: request.codeVerifier } : {},
+            extraParams: request?.codeVerifier
+              ? { code_verifier: request.codeVerifier }
+              : {},
             redirectUri,
           },
           discovery,
@@ -144,7 +192,9 @@ export const useAuth = () => {
             const newSession: LocalAuthSession = {
               accessToken: tokenResponse.accessToken,
               refreshToken: tokenResponse.refreshToken,
-              expiresAt: Math.floor(Date.now() / 1000) + (tokenResponse.expiresIn || 3600),
+              expiresAt:
+                Math.floor(Date.now() / 1000) +
+                (tokenResponse.expiresIn || 3600),
             };
             handleSignInSuccess(newSession);
           })
@@ -157,11 +207,18 @@ export const useAuth = () => {
     } else if (response?.type === "error") {
       console.error("Auth response error:", response.error);
     }
-  }, [response, discovery, request, redirectUri, handleSignInSuccess, setIsLoading]);
+  }, [
+    response,
+    discovery,
+    request,
+    redirectUri,
+    handleSignInSuccess,
+    setIsLoading,
+  ]);
 
   // Listen for network changes
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener(state => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOffline(state.isConnected === false);
     });
     return () => unsubscribe();
@@ -170,7 +227,10 @@ export const useAuth = () => {
   const signIn = async () => {
     const netState = await NetInfo.fetch();
     if (!netState.isConnected) {
-      Alert.alert("Offline", "Please check your internet connection to sign in.");
+      Alert.alert(
+        "Offline",
+        "Please check your internet connection to sign in.",
+      );
       return;
     }
 
@@ -178,8 +238,14 @@ export const useAuth = () => {
     try {
       if (Platform.OS === "android") {
         const result = await WebBrowser.getCustomTabsSupportingBrowsersAsync();
-        if (result.browserPackages.length === 0 && !result.defaultBrowserPackage) {
-          Alert.alert("No Browser Found", "A web browser is required for sign-in.");
+        if (
+          result.browserPackages.length === 0 &&
+          !result.defaultBrowserPackage
+        ) {
+          Alert.alert(
+            "No Browser Found",
+            "A web browser is required for sign-in.",
+          );
           return;
         }
       }

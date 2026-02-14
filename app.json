@@ -4,9 +4,9 @@
     "slug": "digital-business-cards",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./src/assets/icons/tasama-icon.svg",
+    // "icon": "./assets/images/Tasama.png",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      // "image": "./assets/images/Tasama.png",
       "resizeMode": "contain",
       "backgroundColor": "#1A1A5E"
     },
@@ -24,9 +24,14 @@
       }
     },
     "android": {
+      "splash": {
+        // "image": "./assets/images/Tasama.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#FFFFFF"
+      },
       "adaptiveIcon": {
         "backgroundColor": "#0B2B70",
-        "foregroundImage": "./src/assets/icons/tasama-icon.svg",
+        "foregroundImage": "./assets/images/Tasama.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
@@ -50,12 +55,21 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/icons/tasama-logo.svg",
-          "imageWidth": 240,
+          "image": "./assets/images/Tasama.png",
+          "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#1A1A5E",
           "dark": {
             "backgroundColor": "#1A1A5E"
+          },
+          "android": {
+            "backgroundColor": "#1A1A5E",
+            "resizeMode": "native",
+            "image": "./assets/images/Tasama.png"
+          },
+          "ios": {
+            "backgroundColor": "#1A1A5E",
+            "image": "./assets/images/Tasama.png"
           }
         }
       ],
