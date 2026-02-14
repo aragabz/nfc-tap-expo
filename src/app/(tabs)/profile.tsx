@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useProfile } from "@/hooks/use-profile";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Constants from "expo-constants";
+import { useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   Alert,
@@ -22,6 +23,7 @@ import QRCode from "react-native-qrcode-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { user, signOut, isOffline, session } = useAuth();
   const { profile, loading, error, clearError, loadProfile } = useProfile();
   const [isQrVisible, setIsQrVisible] = useState(false);
@@ -153,6 +155,16 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
+      <View style={styles.topHeader}>
+        <View style={{ width: 40 }} />
+        <Icons.TasamaLogoSVG />
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/settings")}
+          style={styles.settingsButton}
+        >
+          <MaterialIcons name="settings" size={26} color="#FFFFFF" />
+        </TouchableOpacity>
+      </View>
       <ScrollView
         bounces={true}
         contentContainerStyle={styles.scrollContent}
@@ -162,12 +174,6 @@ export default function ProfileScreen() {
         }
       >
         <View style={styles.header}>
-          <Icons.TasamaLogoSVG
-            style={{
-              paddingTop: 40,
-            }}
-          />
-
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
@@ -298,6 +304,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0B2B70",
+  },
+  topHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 5,
+  },
+  settingsButton: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
   scrollView: {
     flex: 1,

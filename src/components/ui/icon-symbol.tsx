@@ -22,6 +22,7 @@ const MAPPING = {
   'square.and.arrow.up': 'share',
   'qrcode.viewfinder': 'qr-code-scanner',
   'wallet.pass.fill': 'account-balance-wallet',
+  'gearshape.fill': 'settings',
 } as IconMapping;
 
 /**
